@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>时钟</title>
+    <style>
+        #c1 {
+
+            border-radius: 50%;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="c1" width="400" height="400"></canvas>
+</body>
+<script>
+    /**  @type {HTMLCanvasElement} */
+    var c1 = document.querySelector("#c1");
+    var ctx = c1.getContext("2d");
+    //定义变量
+    var r = 200;
+    var turn = Math.PI * 2;
+    //第一步：移动原点的位置
+    ctx.translate(r, r);
+    //创建图片
+    var img = new Image();
+    //img.src = "./img/樱花.jpg"
+    //画表盘
+    function drawBackground() {
+        ctx.clearRect(-r, -r, 2 * r, 2 * r);
+        ctx.beginPath();
+        ctx.arc(0, 0, r - 5, 0, turn);
+        ctx.strokeStyle = "pink";
+        ctx.lineWidth = 10;
+        ctx.stroke();
+        //设置表盘图片
+        ctx.globalAlpha = 0.5;
+        ctx.drawImage(img, -r, -r, c1.width, c1.height)
+        ctx.globalAlpha = 1;
+        //设置文字
+        ctx.font = "18px 华康少女字体";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillStyle = "orange"
+        ctx.fillText("时钟", 0, r - 90)
+        //时间刻度
+        for (var i = 0; i < 60; i++) {
+            var x = Math.cos(turn / 60 * i) * (r - 25);
+            var y = Math.sin(turn / 60 * i) * (r - 25);
+            ctx.beginPath();
+            ctx.arc(x, y, 5, 0, turn);
+            if (i % 5 == 0) {
+                ctx.fillStyle = "orange";
+            } else {
+                ctx.fillStyle = "pink";
+            }
+            ctx.fill();
+        }
+        //时间数字
+        var hours = [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 1, 2];
+        hours.forEach(function (item, index) {
+            var x = (r - 50) * Math.cos(turn / 12 * index);
+            var y = (r - 50) * Math.sin(turn / 12 * index);
+            ctx.beginPath();
+            ctx.font = "28px 华康少女字体";
+            ctx.fillStyle = "deeppink";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(item, x, y);
+        });
+    }
+
+    //小时
+    function drawHour(hour, minute) {
+        ctx.save(); //保存之前的配置，在这里还没有开始旋转
+        var rad = turn / 12 * hour; //小时的旋转弧度
+        var rad2 = turn / 12 / 60 * minute; //分钟的旋转弧度
+        ctx.rotate(rad + rad2); //旋转
+        ctx.beginPath();
+        ctx.strokeStyle = "pink";
+        ctx.lineWidth = 8;
+        ctx.moveTo(0, 15);
+        ctx.lineTo(0, -r + 110);
+        ctx.lineCap = "round"
+        ctx.stroke();
+        ctx.restore(); //还原到之前的配置，这样我又回到没有旋转的位置
+    }
+
+    //分钟
+    function drawMinute(minute) {
+        ctx.save();
+        var rad = turn / 60 * minute;
+        ctx.rotate(rad);
+        ctx.beginPath();
+        ctx.strokeStyle = "gold";
+        ctx.lineWidth = 5;
+        ctx.moveTo(0, 15);
+        ctx.lineTo(0, -r + 90);
+        ctx.lineCap = "round"
+        ctx.stroke();
+        ctx.restore();
+    }
+
+    //秒钟
+    function drawSecond(second) {
+        ctx.save();
+        var rad = turn / 60 * second;
+        ctx.rotate(rad);
+        ctx.beginPath();
+        ctx.strokeStyle = "red";
+        ctx.lineWidth = 3;
+        ctx.moveTo(0, 15);
+        ctx.lineTo(0, -r + 70);
+        ctx.lineCap = "round"
+        ctx.stroke();
+        ctx.restore();
+    }
+
+    //原点
+    function drawDot() {
+        ctx.beginPath();
+        ctx.fillStyle = "deeppink"
+        ctx.arc(0, 0, 5, 0, turn);
+        ctx.fill()
+    }
+
+    //定时器，每隔一秒触发一次
+    setInterval(function () {
+        var d = new Date();
+        var hour = d.getHours();
+        var minute = d.getMinutes();
+        var second = d.getSeconds();
+
+        drawBackground();
+        drawHour(hour, minute); //小时
+        drawMinute(minute); //分钟
+        drawSecond(second); //秒钟
+        drawDot();
+    }, 1000)
+</script>
+
+</html>
